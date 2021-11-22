@@ -1,1 +1,2 @@
 print("heyy")
+print("bye")

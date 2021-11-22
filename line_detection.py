@@ -1,4 +1,6 @@
-print("heyy")
-print("bye")
+def main():
+    return 1
 
-print("ya king")
+
+if __name__ == "__main__":
+    main()

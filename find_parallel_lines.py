@@ -6,7 +6,7 @@ import glob
 
 def frame_find_lanes(frame):
     figsize = (10,10) 
-    img = util.import_frame(frame)
+    img = util.import_frame('frame75.jpg')
     util.show_image(img,figsize)
     mag_im = canny_image(img)
     util.show_image(mag_im,figsize)

@@ -106,9 +106,6 @@ def tolerance_lines(sorted_lines):
 
 # util.show_image(img,figsize)
 
-
-
-
 # #%%
 # p_img = fpl.perspective_trasnform(img)
 # util.show_image(p_img,figsize)

@@ -26,4 +26,9 @@ def convertVideo2Frames(video):
         cv2.imwrite(path+"\\frame%d.jpg" %cntr,frame)
         success,frame = vidcap.read()
         cntr+=1
-    
+
+def frameList2Video(list):
+    h,w = list[0].shape
+    out = cv2.VideoWriter('lane_vid.avi',cv2.VideoWriter_fourcc('M','J','P','G'),30,(w,h))
+    for frame in list:
+        out.write(frame)

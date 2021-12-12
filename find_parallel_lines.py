@@ -5,15 +5,20 @@ import utility_functions as util
 import glob
 
 def frame_find_lanes(frame):
-    figsize = (10,10) 
-    img = util.import_frame('frame75.jpg')
-    util.show_image(img,figsize)
-    mag_im = canny_image(img)
-    util.show_image(mag_im,figsize)
 
+    figsize = (10,10)
+    #img = util.import_frame(frame)
+    img = frame
+    #util.show_image(img,figsize)
+    mag_im = canny_image(img)
+    #util.show_image(mag_im,figsize)
+
+    pts = np.array([(600,img.shape[0]), (200,img.shape[0]), (320,370), (480,370)])
     mask = np.zeros(mag_im.shape,dtype=np.uint8)
-    mask = cv2.rectangle(mask,(180,400),(550,mask.shape[0]),255,-1)
-    #%%
+
+    cv2.fillConvexPoly(mask,pts,1)
+
+    #util.show_image(mask,figsize)
     masked_im = cv2.bitwise_and(mag_im,mask)
 
     return find_lines(masked_im,img,30)
@@ -42,34 +47,34 @@ def find_lines(src_im,result,TH):
     r_step = 1
     t_step =np.pi/180
     lines = cv2.HoughLines(src_im,r_step,t_step,TH)
-    print(lines)
-    print("\n\n")
-    lines_sorted = sorted(lines, key=lambda a_entry: a_entry[..., 0])
-    # lines_sorted = np.sort(lines,axis=0)
-    print(lines_sorted)
-
-
+    #rint(lines)
+    #print("\n\n")
     res = result.copy()
+    if lines is not None:
+        lines_sorted = sorted(lines, key=lambda a_entry: a_entry[..., 0])
+        #print(lines_sorted)
 
-    tl_line = tolerance_lines(lines_sorted)
-    print(tl_line.shape)
 
 
-    res = cv2.cvtColor(res,cv2.COLOR_GRAY2BGR)
+        tl_line = tolerance_lines(lines_sorted)
+        #print(tl_line.shape)
 
-    for r_t in tl_line:
-        rho = r_t[0, 0]
-        theta = r_t[0, 1]
+        res = cv2.cvtColor(res,cv2.COLOR_GRAY2BGR)
 
-        a = np.cos(theta)
-        b = np.sin(theta)
-        x0 = a * rho
-        y0 = b * rho
-        x1 = int(x0 + 1000 * (-b))
-        y1 = int(y0 + 1000 * (a))
-        x2 = int(x0 - 1000 * (-b))
-        y2 = int(y0 - 1000 * (a))
-        res = cv2.line(res, (x1, y1), (x2, y2), (255, 0, 0), thickness=3)
+    
+        for r_t in tl_line:
+            rho = r_t[0, 0]
+            theta = r_t[0, 1]
+
+            a = np.cos(theta)
+            b = np.sin(theta)
+            x0 = a * rho
+            y0 = b * rho
+            x1 = int(x0 + 1000 * (-b))
+            y1 = int(y0 + 1000 * (a))
+            x2 = int(x0 - 1000 * (-b))
+            y2 = int(y0 - 1000 * (a))
+            res = cv2.line(res, (x1, y1), (x2, y2), (255, 0, 0), thickness=3)
 
     return res
 

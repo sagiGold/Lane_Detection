@@ -4,7 +4,8 @@ import cv2
 import utility_functions as util
 import glob
 
-def frame_find_lanes(frame,src,mask):
+
+def frame_find_lanes(frame,src,mask,cropped):
 
     figsize = (10,10)
     # img = util.import_frame(frame)
@@ -20,8 +21,9 @@ def frame_find_lanes(frame,src,mask):
 
     #util.show_image(mask,figsize)
     masked_im = cv2.bitwise_and(mag_im,mask)
+    return find_lines(masked_im,src,cropped,30)
 
-    return find_lines(masked_im,src,30)
+    # return find_lines(masked_im,src,cv2.cvtColor(mask,cv2.COLOR_GRAY2BGR),30)
 
 #%%
 
@@ -43,7 +45,7 @@ def perspective_trasnform(source_img):
     return perspective
 
 
-def find_lines(masked_img,result,TH):
+def find_lines(masked_img,result,cropped,TH):
     r_step = 1
     t_step =np.pi/180
     lines = cv2.HoughLines(masked_img,r_step,t_step,TH)
@@ -58,20 +60,21 @@ def find_lines(masked_img,result,TH):
         # plotParameterSpace(sorted_lines)
 
         tl_line = tolerance_lines(lines_sorted)
-    
-        for r_t in tl_line:
-            rho = r_t[0, 0]
-            theta = r_t[0, 1]
 
-            a = np.cos(theta)
-            b = np.sin(theta)
-            x0 = a * rho
-            y0 = b * rho
-            x1 = int(x0 + 1000 * (-b))
-            y1 = int(y0 + 1000 * (a))
-            x2 = int(x0 - 1000 * (-b))
-            y2 = int(y0 - 1000 * (a))
-            result = cv2.line(res, (x1, y1), (x2, y2), (255, 0, 0), thickness=5)
+        res = markLanes(tl_line,res,cropped)
+        # for r_t in tl_line:
+        #     rho = r_t[0, 0]
+        #     theta = r_t[0, 1]
+
+        #     a = np.cos(theta)
+        #     b = np.sin(theta)
+        #     x0 = a * rho
+        #     y0 = b * rho
+        #     x1 = int(x0 + 1000 * (-b))
+        #     y1 = int(y0 + 1000 * (a))
+        #     x2 = int(x0 - 1000 * (-b))
+        #     y2 = int(y0 - 1000 * (a))
+        #     result = cv2.line(res, (x1, y1), (x2, y2), (255, 0, 0), thickness=5)
 
     return res
 
@@ -127,3 +130,26 @@ def plotParameterSpace(lines):
     plt.xlabel('rho')
     plt.ylabel('theta')
     plt.show()
+
+def markLanes(param_lines, src, mask_bgr):
+
+    canvas = np.ones((src.shape[0],src.shape[1],3),dtype=np.uint8)
+    for r_t in param_lines:
+        rho = r_t[0, 0]
+        theta = r_t[0, 1]
+
+        a = np.cos(theta)
+        b = np.sin(theta)
+        x0 = a * rho
+        y0 = b * rho
+        x1 = int(x0 + 1000 * (-b))
+        y1 = int(y0 + 1000 * (a))
+        x2 = int(x0 - 1000 * (-b))
+        y2 = int(y0 - 1000 * (a))
+        cv2.line(canvas, (x1, y1), (x2, y2), (0, 0, 255), thickness=10)
+    
+    canvas = cv2.bitwise_and(canvas,mask_bgr)
+
+    return cv2.addWeighted(src,1,canvas,0.8,0)
+    
+    

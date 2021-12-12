@@ -38,5 +38,5 @@ def createMask(img):
     # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     pts = np.array([(600,img.shape[0]), (200,img.shape[0]), (320,370), (480,370)])
     mask = np.zeros(img.shape,dtype=np.uint8)
-    cv2.fillConvexPoly(mask,pts,1)
+    cv2.fillConvexPoly(mask,pts,255)
     return mask

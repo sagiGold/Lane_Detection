@@ -15,7 +15,11 @@ def run(video):
     success,frame = vidcap.read()
 
     mask = util.createMask(frame)
-
+    
+    cropped_mask = mask.copy()
+    cropped_mask[370:,:] = 255
+    cropped_mask = cv2.cvtColor(cropped_mask,cv2.COLOR_GRAY2BGR)
+    # util.show_image(cropped_mask,(10,10))
     cntr=0
     frame_list=[]
     #path = 'C:/Users/idano/Documents/HomeWork/3rd semester/computer vision/Line_Detection_Proj/frames_new'
@@ -23,7 +27,7 @@ def run(video):
     while success:
         frame_src = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame_gray = cv2.cvtColor(frame_src, cv2.COLOR_BGR2GRAY)
-        frame_list.append(fpl.frame_find_lanes(frame_gray,frame,mask))
+        frame_list.append(fpl.frame_find_lanes(frame_gray,frame,mask,cropped_mask))
         #cv2.imwrite(path+"\\frame%d.jpg" %cntr,frame_list[cntr])
         success,frame = vidcap.read()
         cntr+=1

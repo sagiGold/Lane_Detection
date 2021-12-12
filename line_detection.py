@@ -16,6 +16,11 @@ def run(video):
 
     mask = util.createMask(frame)
     
+    h,w,d = frame.shape
+    out = cv2.VideoWriter('lane_video_final.avi',cv2.VideoWriter_fourcc('M','J','P','G'),30,(w,h))
+    
+    # util.show_image(mask,(10,10))
+
     cropped_mask = mask.copy()
     cropped_mask[370:,:] = 255
     cropped_mask = cv2.cvtColor(cropped_mask,cv2.COLOR_GRAY2BGR)
@@ -27,12 +32,18 @@ def run(video):
     while success:
         frame_src = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame_gray = cv2.cvtColor(frame_src, cv2.COLOR_BGR2GRAY)
-        frame_list.append(fpl.frame_find_lanes(frame_gray,frame,mask,cropped_mask))
+        out.write(fpl.frame_find_lanes(frame_gray,frame,mask,cropped_mask))
+
+        # frame_list.append(fpl.frame_find_lanes(frame_gray,frame,mask,cropped_mask))
         #cv2.imwrite(path+"\\frame%d.jpg" %cntr,frame_list[cntr])
+        
         success,frame = vidcap.read()
         cntr+=1
 
-    util.frameList2Video(frame_list)
+    
+
+
+    # util.frameList2Video(frame_list)
 
 
 def test():
@@ -44,7 +55,7 @@ def test():
 if __name__ == "__main__":
     main()
     cv2.waitKey(0)
-    print("hey")
+    print("finished")
 
 
 # %%

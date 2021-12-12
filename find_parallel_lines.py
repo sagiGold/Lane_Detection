@@ -19,8 +19,8 @@ def frame_find_lanes(frame,src,mask,cropped):
 
     # cv2.fillConvexPoly(mask,pts,1)
 
-    #util.show_image(mask,figsize)
     masked_im = cv2.bitwise_and(mag_im,mask)
+    # util.show_image(masked_im,figsize)
     return find_lines(masked_im,src,cropped,30)
 
     # return find_lines(masked_im,src,cv2.cvtColor(mask,cv2.COLOR_GRAY2BGR),30)
@@ -49,33 +49,18 @@ def find_lines(masked_img,result,cropped,TH):
     r_step = 1
     t_step =np.pi/180
     lines = cv2.HoughLines(masked_img,r_step,t_step,TH)
-    #rint(lines)
-    #print("\n\n")
+
     res = result.copy()
     if lines is not None:
         #to find the lanes we use sorting by rho and then we tolerance to find the median parameters
         lines_sorted = sorted(lines, key=lambda a_entry: a_entry[..., 0])
         
         # function to plot the parameter space :
-        # plotParameterSpace(sorted_lines)
+        # plotParameterSpace(lines_sorted)
 
         tl_line = tolerance_lines(lines_sorted)
 
         res = markLanes(tl_line,res,cropped)
-        # for r_t in tl_line:
-        #     rho = r_t[0, 0]
-        #     theta = r_t[0, 1]
-
-        #     a = np.cos(theta)
-        #     b = np.sin(theta)
-        #     x0 = a * rho
-        #     y0 = b * rho
-        #     x1 = int(x0 + 1000 * (-b))
-        #     y1 = int(y0 + 1000 * (a))
-        #     x2 = int(x0 - 1000 * (-b))
-        #     y2 = int(y0 - 1000 * (a))
-        #     result = cv2.line(res, (x1, y1), (x2, y2), (255, 0, 0), thickness=5)
-
     return res
 
 def canny_image(src_im):
@@ -94,28 +79,16 @@ def tolerance_lines(sorted_lines):
 
     for idx, line in enumerate(sorted_lines):
         #checks if current line can be tolerated
+        #checks if tl_line and line absulute diff is smaller than the tolerace
         if(abs(tl_lines[i][0][0] - line[0][0]) < tol_r and abs(tl_lines[i][0][1]-line[0][1]) < tol_t):
             tl_lines[i][0][0] = (idx*tl_lines[i][0][0]+line[0][0])/(idx + 1)
             tl_lines[i][0][1] = (idx*tl_lines[i][0][1]+line[0][1])/(idx + 1)
         else:
+            #adds new line to the array
             tl_lines = np.vstack([tl_lines,np.array([line])])
             i+=1
 
     return tl_lines
-
-
-# cv2.circle(img,(100,400),5,(0,0,250),-1)
-# cv2.circle(img,(700,400),5,(0,0,250),-1)
-# cv2.circle(img,(0,400),5,(0,0,250),-1)
-# cv2.circle(img,(730,470),5,(0,0,250),-1)
-
-# util.show_image(img,figsize)
-
-# #%%
-# p_img = fpl.perspective_trasnform(img)
-# util.show_image(p_img,figsize)
-# p_img = fpl.perspective_trasnform(cropped_img,img)
-# util.show_image(p_img,figsize)
 
 def plotParameterSpace(lines):
     rho = []

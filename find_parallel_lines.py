@@ -4,24 +4,24 @@ import cv2
 import utility_functions as util
 import glob
 
-def frame_find_lanes(frame):
+def frame_find_lanes(frame,src,mask):
 
     figsize = (10,10)
-    #img = util.import_frame(frame)
+    # img = util.import_frame(frame)
     img = frame
     #util.show_image(img,figsize)
     mag_im = canny_image(img)
-    #util.show_image(mag_im,figsize)
+    # util.show_image(mag_im,figsize)
 
-    pts = np.array([(600,img.shape[0]), (200,img.shape[0]), (320,370), (480,370)])
-    mask = np.zeros(mag_im.shape,dtype=np.uint8)
+    # pts = np.array([(600,img.shape[0]), (200,img.shape[0]), (320,370), (480,370)])
+    # mask = np.zeros(mag_im.shape,dtype=np.uint8)
 
-    cv2.fillConvexPoly(mask,pts,1)
+    # cv2.fillConvexPoly(mask,pts,1)
 
     #util.show_image(mask,figsize)
     masked_im = cv2.bitwise_and(mag_im,mask)
 
-    return find_lines(masked_im,img,30)
+    return find_lines(masked_im,src,30)
 
 #%%
 
@@ -43,24 +43,21 @@ def perspective_trasnform(source_img):
     return perspective
 
 
-def find_lines(src_im,result,TH):
+def find_lines(masked_img,result,TH):
     r_step = 1
     t_step =np.pi/180
-    lines = cv2.HoughLines(src_im,r_step,t_step,TH)
+    lines = cv2.HoughLines(masked_img,r_step,t_step,TH)
     #rint(lines)
     #print("\n\n")
     res = result.copy()
     if lines is not None:
+        #to find the lanes we use sorting by rho and then we tolerance to find the median parameters
         lines_sorted = sorted(lines, key=lambda a_entry: a_entry[..., 0])
-        #print(lines_sorted)
-
-
+        
+        # function to plot the parameter space :
+        # plotParameterSpace(sorted_lines)
 
         tl_line = tolerance_lines(lines_sorted)
-        #print(tl_line.shape)
-
-        res = cv2.cvtColor(res,cv2.COLOR_GRAY2BGR)
-
     
         for r_t in tl_line:
             rho = r_t[0, 0]
@@ -74,24 +71,24 @@ def find_lines(src_im,result,TH):
             y1 = int(y0 + 1000 * (a))
             x2 = int(x0 - 1000 * (-b))
             y2 = int(y0 - 1000 * (a))
-            res = cv2.line(res, (x1, y1), (x2, y2), (255, 0, 0), thickness=3)
+            result = cv2.line(res, (x1, y1), (x2, y2), (255, 0, 0), thickness=5)
 
     return res
 
 def canny_image(src_im):
     figsize = (10,10)
-    ret,im_th = cv2.threshold(src_im,200,255,cv2.THRESH_BINARY)
+    ret,im_th = cv2.threshold(src_im,220,255,cv2.THRESH_BINARY)
     im_edge = cv2.Canny(im_th,0,255)
     return im_edge
 
 
-
+#returns the median parameter lines from list of lines
 def tolerance_lines(sorted_lines):
     tl_lines= np.array([sorted_lines[0]])
-    tol_r = 15
-    tol_t = 0.1
-
+    tol_r = 200
+    tol_t = 0.7
     i = 0
+
     for idx, line in enumerate(sorted_lines):
         #checks if current line can be tolerated
         if(abs(tl_lines[i][0][0] - line[0][0]) < tol_r and abs(tl_lines[i][0][1]-line[0][1]) < tol_t):
@@ -117,3 +114,16 @@ def tolerance_lines(sorted_lines):
 # p_img = fpl.perspective_trasnform(cropped_img,img)
 # util.show_image(p_img,figsize)
 
+def plotParameterSpace(lines):
+    rho = []
+    th = []
+
+    for l in lines:
+        r,t = l[0]
+        rho.append(r)
+        th.append(t)
+
+    plt.scatter(rho,th)
+    plt.xlabel('rho')
+    plt.ylabel('theta')
+    plt.show()

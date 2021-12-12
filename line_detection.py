@@ -13,14 +13,17 @@ def main():
 def run(video):
     vidcap = cv2.VideoCapture(video)
     success,frame = vidcap.read()
+
+    mask = util.createMask(frame)
+
     cntr=0
     frame_list=[]
-    path = 'C:/Users/idano/Documents/HomeWork/3rd semester/computer vision/Line_Detection_Proj/frames_new'
-
+    #path = 'C:/Users/idano/Documents/HomeWork/3rd semester/computer vision/Line_Detection_Proj/frames_new'
+    # frame = util.import_frame("frame827.jpg")
     while success:
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        frame_list.append(fpl.frame_find_lanes(frame))
+        frame_src = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame_gray = cv2.cvtColor(frame_src, cv2.COLOR_BGR2GRAY)
+        frame_list.append(fpl.frame_find_lanes(frame_gray,frame,mask))
         #cv2.imwrite(path+"\\frame%d.jpg" %cntr,frame_list[cntr])
         success,frame = vidcap.read()
         cntr+=1

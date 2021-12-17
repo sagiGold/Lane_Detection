@@ -41,7 +41,7 @@ def run(video):
         frame_gray = cv2.cvtColor(frame_src, cv2.COLOR_BGR2GRAY)
         finished_frame,prev_l,prev_r,cntr = fpl.frame_find_lanes(frame_gray,frame,mask,cropped_mask,prev_l,prev_r,cntr)
 
-        # cv2.imwrite(path+"\\frame%d.jpg" %t_cntr,finished_frame)
+        cv2.imwrite(path+"\\frame%d.jpg" %t_cntr,finished_frame)
 
         out.write(finished_frame)
 

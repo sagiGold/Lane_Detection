@@ -40,3 +40,17 @@ def createMask(img):
     mask = np.zeros(img.shape,dtype=np.uint8)
     cv2.fillConvexPoly(mask,pts,255)
     return mask
+
+def plotParameterSpace(lines):
+    rho = []
+    th = []
+
+    for l in lines:
+        r,t = l[0]
+        rho.append(r)
+        th.append(t)
+
+    plt.scatter(rho,th)
+    plt.xlabel('rho')
+    plt.ylabel('theta')
+    plt.show()
